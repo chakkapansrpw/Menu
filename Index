@@ -1,0 +1,623 @@
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodCost Manager - ระบบบริหารวัตถุดิบร้านอาหาร</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --sidebar-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #6c757d;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            padding: 20px 0;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .logo i {
+            font-size: 28px;
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(67, 97, 238, 0.05);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+        }
+
+        .menu-item i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        /* Cards */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .card-change {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .positive {
+            color: #4ade80;
+        }
+
+        .negative {
+            color: #f87171;
+        }
+
+        /* Charts */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chart-actions select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        /* Tables */
+        .table-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status.in-stock {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success);
+        }
+
+        .status.low-stock {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--warning);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                width: 70px;
+            }
+            
+            .logo h1, .menu-item span {
+                display: none;
+            }
+            
+            .menu-item {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .menu-item i {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-utensils"></i>
+            <h1>FoodCost Manager</h1>
+        </div>
+        <a href="#" class="menu-item active">
+            <i class="fas fa-home"></i>
+            <span>แดชบอร์ด</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-utensils"></i>
+            <span>จัดการเมนู</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-boxes"></i>
+            <span>จัดการวัตถุดิบ</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-chart-line"></i>
+            <span>รายงานและการวิเคราะห์</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-cog"></i>
+            <span>การตั้งค่า</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-database"></i>
+            <span>เชื่อมต่อฐานข้อมูล</span>
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h2>แดชบอร์ด</h2>
+            <div class="user-info">
+                <img src="https://i.pravatar.cc/150?img=12" alt="User">
+                <span>ผู้ดูแลระบบ</span>
+            </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="cards-container">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">รายได้วันนี้</div>
+                    <div class="card-icon" style="background-color: var(--primary);">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                </div>
+                <div class="card-value">฿12,450</div>
+                <div class="card-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>15% จากเมื่อวาน</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">ยอดขายทั้งหมด</div>
+                    <div class="card-icon" style="background-color: var(--success);">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                </div>
+                <div class="card-value">89</div>
+                <div class="card-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>8% จากเมื่อวาน</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">ต้นทุนวัตถุดิบ</div>
+                    <div class="card-icon" style="background-color: var(--warning);">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                </div>
+                <div class="card-value">฿4,230</div>
+                <div class="card-change negative">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>5% จากเมื่อวาน</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">กำไร</div>
+                    <div class="card-icon" style="background-color: var(--info);">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                </div>
+                <div class="card-value">฿8,220</div>
+                <div class="card-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>12% จากเมื่อวาน</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-container">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">ยอดขายรายเดือน</div>
+                    <div class="chart-actions">
+                        <select>
+                            <option>12 เดือนล่าสุด</option>
+                            <option>6 เดือนล่าสุด</option>
+                            <option>3 เดือนล่าสุด</option>
+                        </select>
+                    </div>
+                </div>
+                <canvas id="salesChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">เมนูขายดี</div>
+                    <div class="chart-actions">
+                        <select>
+                            <option>เดือนนี้</option>
+                            <option>สัปดาห์นี้</option>
+                            <option>วันนี้</option>
+                        </select>
+                    </div>
+                </div>
+                <canvas id="topProductsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active">วัตถุดิบคงเหลือ</div>
+            <div class="tab">เมนูแนะนำ</div>
+            <div class="tab">การแจ้งเตือน</div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3>วัตถุดิบคงเหลือ</h3>
+                <button class="btn btn-primary">เพิ่มวัตถุดิบ</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>วัตถุดิบ</th>
+                        <th>จำนวนคงเหลือ</th>
+                        <th>หน่วย</th>
+                        <th>สถานะ</th>
+                        <th>การจัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>นมสด</td>
+                        <td>25</td>
+                        <td>ลิตร</td>
+                        <td><span class="status in-stock">เพียงพอ</span></td>
+                        <td>
+                            <button class="btn btn-outline">แก้ไข</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>ใบชา</td>
+                        <td>3</td>
+                        <td>กิโลกรัม</td>
+                        <td><span class="status low-stock">ใกล้หมด</span></td>
+                        <td>
+                            <button class="btn btn-outline">แก้ไข</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>ไข่มุก</td>
+                        <td>8</td>
+                        <td>กิโลกรัม</td>
+                        <td><span class="status in-stock">เพียงพอ</span></td>
+                        <td>
+                            <button class="btn btn-outline">แก้ไข</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>น้ำตาล</td>
+                        <td>2</td>
+                        <td>กิโลกรัม</td>
+                        <td><span class="status low-stock">ใกล้หมด</span></td>
+                        <td>
+                            <button class="btn btn-outline">แก้ไข</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Sales Chart
+        const salesCtx = document.getElementById('salesChart').getContext('2d');
+        const salesChart = new Chart(salesCtx, {
+            type: 'line',
+            data: {
+                labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
+                datasets: [{
+                    label: 'รายได้ (บาท)',
+                    data: [12000, 19000, 15000, 25000, 22000, 30000, 28000, 26000, 24000, 30000, 32000, 35000],
+                    borderColor: '#4361ee',
+                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Top Products Chart
+        const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
+        const topProductsChart = new Chart(topProductsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['ชานมไข่มุก', 'กาแฟลาเต้', 'ชาไทย', 'น้ำเปล่า', 'อื่นๆ'],
+                datasets: [{
+                    data: [35, 25, 20, 10, 10],
+                    backgroundColor: [
+                        '#4361ee',
+                        '#4cc9f0',
+                        '#3f37c9',
+                        '#f72585',
+                        '#4895ef'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
